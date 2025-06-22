@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>1v1 Video Editor</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    label { display: block; margin-top: 8px; }
+    details { margin-left: 20px; margin-bottom: 8px; }
+    button { margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>1v1 Video Editor</h1>
+  <form id="uploadForm" enctype="multipart/form-data" method="post" action="/upload">
+    <label>Left Video: <input type="file" name="left" accept="video/*" required></label><br>
+    <label>Left Start (sec): <input type="number" name="start1" step="any"></label>
+    <label>Left Duration (sec): <input type="number" name="duration1" step="any"></label><br>
+    <label>Left Speed: <input type="number" name="speed1" value="1" step="0.1"></label>
+    <details>
+      <summary>Left Crop</summary>
+      <label>X: <input type="number" name="cropx1" step="any"></label>
+      <label>Y: <input type="number" name="cropy1" step="any"></label>
+      <label>Width: <input type="number" name="cropw1" step="any"></label>
+      <label>Height: <input type="number" name="croph1" step="any"></label>
+    </details>
+    <label>Right Video: <input type="file" name="right" accept="video/*" required></label><br>
+    <label>Right Start (sec): <input type="number" name="start2" step="any"></label>
+    <label>Right Duration (sec): <input type="number" name="duration2" step="any"></label><br>
+    <label>Right Speed: <input type="number" name="speed2" value="1" step="0.1"></label>
+    <details>
+      <summary>Right Crop</summary>
+      <label>X: <input type="number" name="cropx2" step="any"></label>
+      <label>Y: <input type="number" name="cropy2" step="any"></label>
+      <label>Width: <input type="number" name="cropw2" step="any"></label>
+      <label>Height: <input type="number" name="croph2" step="any"></label>
+    </details>
+    <label>Layout:
+      <select name="layout">
+        <option value="horizontal" selected>Horizontal</option>
+        <option value="vertical">Vertical</option>
+      </select>
+    </label><br>
+    <label>Filter:
+      <select name="filter">
+        <option value="none" selected>None</option>
+        <option value="grayscale">Grayscale</option>
+        <option value="sepia">Sepia</option>
+      </select>
+    </label><br>
+    <label>Watermark Image: <input type="file" name="watermark" accept="image/*"></label><br>
+    <label>Overlay Text: <input type="text" name="text"></label><br>
+    <button type="submit">Combine</button>
+  </form>
+  <div id="result"></div>
+</body>
+</html>
+<script>
+  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const result = document.getElementById('result');
+    result.innerText = 'Processing...';
+    const formData = new FormData(e.target);
+    const res = await fetch('/upload', { method: 'POST', body: formData });
+    if (!res.ok) {
+      const text = await res.text();
+      result.innerText = text;
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'combined.mp4';
+    a.innerText = 'Download result';
+    result.innerHTML = '';
+    result.appendChild(a);
+  });
+</script>
